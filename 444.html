@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="家庭物品管理系统 - 轻松管理您的家庭物品、图书和玩具">
+    <title>家庭物品管理系统 Pro</title>
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --danger-color: #ff4d4f;
+            --purple-color: #722ed1;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-light: #999;
+            --bg-light: #f0f2f5;
+            --bg-white: white;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        /* 统计信息样式 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* 输入区域样式 */
+        .input-card {
+            background: var(--bg-white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+
+        /* 辅助搜索按钮组 */
+        .input-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .helper-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background-color: #f8f9fa;
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .helper-btn:hover {
+            background-color: #e2e6ea;
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .helper-btn.taobao { color: #ff5000; border-color: #ffdbcc; }
+        .helper-btn.jd { color: #e4393c; border-color: #fad1d1; }
+        .helper-btn.douban { color: #007722; border-color: #ccebd4; }
+
+        /* 特殊区域显示控制 */
+        .hidden {
+            display: none !important;
+        }
+
+        button.add-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        button.add-btn:hover {
+            background-color: #096dd9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        }
+
+        button.add-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--bg-white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-white);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .export-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #389e0d;
+        }
+
+        /* 列表区域样式 */
+        .item-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: var(--bg-white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+
+        /* 类别标签 */
+        .category-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+            z-index: 2;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .cat-item { background-color: var(--purple-color); }
+        .cat-toy { background-color: var(--warning-color); }
+        .cat-book { background-color: var(--success-color); }
+
+        .img-container {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .item-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .item-card:hover .item-img {
+            transform: scale(1.05);
+        }
+
+        .card-content {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .item-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        .douban-score {
+            font-size: 12px;
+            color: #007722;
+            background: #eafff0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .item-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            min-height: 40px;
+            line-height: 1.5;
+        }
+
+        .item-price {
+            color: var(--danger-color);
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: auto;
+        }
+        
+        .price-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: normal;
+        }
+
+        .card-actions {
+            padding: 12px 15px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+        }
+
+        /* 状态样式 */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-available { 
+            background-color: #f6ffed; 
+            color: var(--success-color); 
+            border: 1px solid #b7eb8f; 
+        }
+        .status-borrowed { 
+            background-color: #fff1f0; 
+            color: var(--danger-color); 
+            border: 1px solid #ffa39e; 
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        button.action-btn {
+            border: 1px solid var(--border-color);
+            background: var(--bg-white);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        button.action-btn:hover { 
+            color: var(--primary-color); 
+            border-color: var(--primary-color); 
+            transform: translateY(-1px);
+        }
+        
+        button.delete-btn:hover { 
+            color: var(--danger-color); 
+            border-color: var(--danger-color); 
+        }
+
+        /* 空状态提示 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state img {
+            width: 120px;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .item-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .filter-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .input-card {
+                padding: 20px;
+            }
+            
+            .control-panel {
+                padding: 12px;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .item-card {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📦 家庭物品管理系统 Pro</h1>
+    
+    <!-- 统计信息 -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-label">总物品数</div>
+            <div class="stat-value" id="totalCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">在库物品</div>
+            <div class="stat-value" id="availableCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">已借出</div>
+            <div class="stat-value" id="borrowedCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">总价值</div>
+            <div class="stat-value" id="totalValue">¥0</div>
+        </div>
+    </div>
+
+    <!-- 输入表单 -->
+    <div class="input-card">
+        <div class="form-row">
+            <div class="form-group">
+                <label>分类:</label>
+                <select id="itemCategory" onchange="handleCategoryChange()">
+                    <option value="item">物品</option>
+                    <option value="toy">玩具</option>
+                    <option value="book">图书</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>名称:</label>
+                <div class="input-group">
+                    <input type="text" id="itemName" placeholder="输入物品名称...">
+                </div>
+            </div>
+        </div>
+
+        <div id="bookFields" class="form-group hidden">
+            <label>豆瓣评分:</label>
+            <div class="input-group">
+                <input type="number" id="doubanScore" step="0.1" max="10" min="0" placeholder="例如: 8.5">
+                <button class="helper-btn douban" onclick="searchOnline('douban')">去豆瓣 ↗</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>照片:</label>
+            <input type="file" id="itemImage" accept="image/*" onchange="previewImage(event)">
+            <div id="imagePreview" class="hidden" style="margin-top: 10px;">
+                <img id="previewImg" style="max-width: 200px; max-height: 150px; border-radius: 6px;">
+                <button onclick="removeImage()" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;">移除</button>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>价格 (元):</label>
+                <div class="input-group">
+                    <input type="number" id="itemPrice" placeholder="0" min="0" step="0.01">
+                    <button class="helper-btn taobao" onclick="searchOnline('taobao')">查淘宝 ↗</button>
+                    <button class="helper-btn jd" onclick="searchOnline('jd')">查京东 ↗</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>状态:</label>
+                <select id="itemStatus">
+                    <option value="available">在库</option>
+                    <option value="borrowed">已借出</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>简介/备注:</label>
+            <textarea id="itemDesc" rows="3" placeholder="填写更多细节..."></textarea>
+        </div>
+
+        <button class="add-btn" onclick="addItem()">确认入库</button>
+    </div>
+
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索物品..." oninput="filterItems()">
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterByCategory('all')">全部</button>
+            <button class="filter-btn" onclick="filterByCategory('item')">物品</button>
+            <button class="filter-btn" onclick="filterByCategory('toy')">玩具</button>
+            <button class="filter-btn" onclick="filterByCategory('book')">图书</button>
+            <button class="filter-btn" onclick="showBorrowedOnly()">仅显示借出</button>
+        </div>
+        <button class="export-btn" onclick="exportData()">导出数据</button>
+    </div>
+    
+    <!-- 物品列表 -->
+    <div id="itemList" class="item-list">
+        <!-- 动态内容 -->
+    </div>
+</div>
+
+<script>
+    // 页面加载
+    document.addEventListener('DOMContentLoaded', () => {
+        loadItems();
+        updateStats();
+    });
+
+    // 图片预览
+    function previewImage(event) {
+        const preview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const file = event.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeImage() {
+        document.getElementById('itemImage').value = '';
+        document.getElementById('imagePreview').classList.add('hidden');
+    }
+
+    // 监听分类变化
+    function handleCategoryChange() {
+        const category = document.getElementById('itemCategory').value;
+        const bookFields = document.getElementById('bookFields');
+        bookFields.classList.toggle('hidden', category !== 'book');
+    }
+
+    // 辅助搜索功能
+    function searchOnline(platform) {
+        const name = document.getElementById('itemName').value.trim();
+        if (!name) {
+            alert("请先输入物品名称！");
+            return;
+        }
+
+        const urls = {
+            'taobao': `https://s.taobao.com/search?q=${encodeURIComponent(name)}`,
+            'jd': `https://search.jd.com/Search?keyword=${encodeURIComponent(name)}`,
+            'douban': `https://search.douban.com/book/subject_search?search_text=${encodeURIComponent(name)}`
+        };
+        
+        window.open(urls[platform], '_blank');
+    }
+
+    // 添加物品
+    function addItem() {
+        const category = document.getElementById('itemCategory').value;
+        const name = document.getElementById('itemName').value.trim();
+        const desc = document.getElementById('itemDesc').value.trim();
+        const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+        const doubanScore = document.getElementById('doubanScore').value;
+        const status = document.getElementById('itemStatus').value;
+        const imageInput = document.getElementById('itemImage');
+
+        if (!name) {
+            alert("请输入物品名称！");
+            return;
+        }
+
+        const newItem = {
+            id: Date.now(),
+            category: category,
+            name: name,
+            desc: desc,
+            price: price,
+            doubanScore: category === 'book' ? doubanScore : null,
+            isBorrowed: status === 'borrowed',
+            addedDate: new Date().toISOString().split('T')[0]
+        };
+
+        // 处理图片
+        if (imageInput.files && imageInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                newItem.image = e.target.result;
+                saveItem(newItem);
+            };
+            reader.readAsDataURL(imageInput.files[0]);
+        } else {
+            saveItem(newItem);
+        }
+    }
+
+    // 保存物品
+    function saveItem(item) {
+        let items = JSON.parse(localStorage.getItem('inventoryProData')) || [];
+        items.push(item);
+        
+        try {
+            localStorage.setItem('inventoryProData', JSON.stringify(items));
+            resetForm();
+            loadItems();
+            updateStats();
+            showToast('物品添加成功！');
+        } catch (e) {
+            alert("存储失败！图片可能过大。");
+        }
+    }
+
+    // 加载物品列表
+    function loadItems(filter = null) {
+        const listContainer = document.getElementById('itemList');
+        let items = JSON.parse(localStorage.getItem('inventoryProData')) || [];
+        
+        // 应用过滤
+        if (filter) {
+            items = items.filter(filter);
+        }
+        
+        if (items.length === 0) {
+            listContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📦</div>
+                    <h3 style="color: #666; margin-bottom: 10px;">暂无物品</h3>
+                    <p style="color: #999;">添加第一个物品开始管理吧！</p>
+                </div>
+            `;
+            return;
+        }
+        
+        listContainer.innerHTML = '';
+        
+        items.reverse().forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            
+            // 分类标签
+            const categoryConfig = {
+                'item': { label: '物品', class: 'cat-item' },
+                'toy': { label: '玩具', class: 'cat-toy' },
+                'book': { label: '图书', class: 'cat-book' }
+            };
+            const catConfig = categoryConfig[item.category] || categoryConfig.item;
+            
+            // 状态
+            const statusClass = item.isBorrowed ? 'status-borrowed' : 'status-available';
+            const statusText = item.isBorrowed ? '已借出' : '在库';
+            const btnText = item.isBorrowed ? '归还' : '借出';
+            
+            // 图片
+            const imgHtml = item.image 
+                ? `<img src="${item.image}" class="item-img" alt="${item.name}" loading="lazy">` 
+                : `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ccc; font-size: 14px;">无图片</div>`;
+            
+            // 豆瓣评分
+            const doubanHtml = (item.category === 'book' && item.doubanScore) 
+                ? `<span class="douban-score">豆瓣 ${item.doubanScore}</span>` 
+                : '';
+            
+            // 日期显示
+            const dateHtml = item.addedDate 
+                ? `<div style="font-size: 11px; color: #999; margin-top: 5px;">添加: ${item.addedDate}</div>`
+                : '';
+            
+            card.innerHTML = `
+                <div class="category-tag ${catConfig.class}">${catConfig.label}</div>
+                <div class="img-container">${imgHtml}</div>
+                
+                <div class="card-content">
+                    <div class="card-header">
+                        <h4 class="item-name">${escapeHtml(item.name)}</h4>
+                        ${doubanHtml}
+                    </div>
+                    
+                    <div class="item-desc">${escapeHtml(item.desc) || '暂无描述'}</div>
+                    
+                    <div class="item-price">
+                        <span class="price-label">¥</span> ${item.price ? item.price.toFixed(2) : '0.00'}
+                    </div>
+                    ${dateHtml}
+                </div>
+
+                <div class="card-actions">
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="toggleStatus(${item.id})">${btnText}</button>
+                        <button class="action-btn delete-btn" onclick="deleteItem(${item.id})">删除</button>
+                    </div>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    // 切换状态
+    function toggleStatus(id) {
+        let items = JSON.parse(localStorage.getItem('inventoryProData')) || [];
+        const index = items.findIndex(item => item.id === id);
+        if (index !== -1) {
+            items[index].isBorrowed = !items[index].isBorrowed;
+            localStorage.setItem('inventoryProData', JSON.stringify(items));
+            loadItems();
+            updateStats();
+            showToast(`物品已${items[index].isBorrowed ? '借出' : '归还'}！`);
+        }
+    }
+
+    // 删除物品
+    function deleteItem(id) {
+        if(confirm("确定要删除这个物品吗？此操作不可撤销。")) {
+            let items = JSON.parse(localStorage.getItem('inventoryProData')) || [];
+            items = items.filter(item => item.id !== id);
+            localStorage.setItem('inventoryProData', JSON.stringify(items));
+            loadItems();
+            updateStats();
+            showToast('物品已删除！');
+        }
+    }
+
+    // 过滤物品
+    function filterByCategory(category) {
+        // 更新按钮状态
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        const filter = category === 'all' 
+            ? null 
+            : item => item.category === category;
+        
+        loadItems(filter);
+    }
+
+    function showBorrowedOnly() {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        loadItems(item => item.isBorrowed);
+    }
+
+    // 搜索过滤
+    function filterItems() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        if (!searchTerm) {
+            loadItems();
+            return;
+        }
+        
+        loadItems(item => 
+            item.name.toLowerCase().includes(searchTerm) ||
+            (item.desc && item.desc.toLowerCase().includes(searchTerm))
+        );
+    }
+
+    // 更新统计信息
+    function updateStats() {
+        const items = JSON.parse(localStorage.getItem('inventoryProData')) || [];
+        const availableItems = items.filter(item => !item.isBorrowed);
+        const borrowedItems = items.filter(item => item.isBorrowed);
+        const totalValue = items.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
+        
+        document.getElementById('totalCount').textContent = items.length;
+        document.getElementById('availableCount').textContent = availableItems.length;
+        document.getElementById('borrowedCount').textContent = borrowedItems.length;
+        document.getElementById('totalValue').textContent = `¥${totalValue.toFixed(2)}`;
+    }
+
+    // 导出数据
+    function exportData() {
+        const items = JSON.parse(localStorage.getItem('inventoryProData')) || [];
+        if (items.length === 0) {
+            alert('没有数据可以导出！');
+            return;
+        }
+        
+        const dataStr = JSON.stringify(items, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = `家庭物品数据_${new Date().toISOString().split('T')[0]}.json`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        
+        showToast('数据导出成功！');
+    }
+
+    // 重置表单
+    function resetForm() {
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemDesc').value = '';
+        document.getElementById('itemPrice').value = '';
+        document.getElementById('doubanScore').value = '';
+        document.getElementById('itemImage').value = '';
+        document.getElementById('imagePreview').classList.add('hidden');
+        document.getElementById('itemCategory').value = 'item';
+        document.getElementById('itemStatus').value = 'available';
+        handleCategoryChange();
+    }
+
+    // 显示提示
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #52c41a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            z-index: 1000;
+            animation: fadeInOut 3s ease-in-out;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.5s ease-out forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 2500);
+    }
+
+    // HTML转义
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // 添加CSS动画
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>
